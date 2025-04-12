@@ -151,6 +151,7 @@
   </style>
 </head>
 <body>
+
   <div id="start">
     <h1>Welcome to Sheryl’s Easter Game Room!</h1>
     <h2>Please enter your name to begin.</h2>
@@ -165,7 +166,9 @@
     <button class="answer-btn">to</button>
     <div id="feedback"></div>
     <div id="timer">Time left: 5</div>
-    <div id="progressContainer"><div id="progressBar"></div></div>
+    <div id="progressContainer">
+      <div id="progressBar"></div>
+    </div>
   </div>
 
   <div id="scoreboard">
@@ -173,18 +176,25 @@
     <p>You collected <strong><span id="eggCount"></span></strong> colorful Easter eggs!</p>
     <p>Your score: <span id="finalScore"></span> / <span id="totalQuestions"></span></p>
     <p>Time used: <span id="totalTime"></span> seconds</p>
+
     <div id="summary">
       <h3>Check your mistakes:</h3>
       <ul id="wrongList"></ul>
     </div>
+
     <h3>Class Scoreboard</h3>
     <table border="1">
-      <thead><tr><th>Name</th><th>Score</th><th>Eggs</th><th>Time (s)</th></tr></thead>
+      <thead>
+        <tr><th>Name</th><th>Score</th><th>Eggs</th><th>Time (s)</th></tr>
+      </thead>
       <tbody id="scoreTable"></tbody>
     </table>
   </div>
 
+  <!-- Easter egg image -->
   <img id="eggImage" class="egg-popup" src="https://www.pngmart.com/files/13/Easter-Egg-PNG-Transparent-Image.png" style="display: none;" />
+
+  <!-- Sound Effects -->
   <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_a196bb6f1d.mp3?filename=correct-2-46134.mp3"></audio>
   <audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_bcf6e0b73d.mp3?filename=error-2-36057.mp3"></audio>
 
@@ -209,8 +219,15 @@
       { verb: "bring", preposition: "to" }
     ];
 
-    let questions = [], current = 0, score = 0, eggs = 0;
-    let playerName = "", countdown, timeLeft = 5, totalTime = 0, timerInterval;
+    let questions = [];
+    let current = 0;
+    let score = 0;
+    let eggs = 0;
+    let playerName = "";
+    let countdown;
+    let timeLeft = 5;
+    let totalTime = 0;
+    let timerInterval;
     let wrongAnswers = [];
 
     function shuffle(array) {
@@ -222,14 +239,24 @@
 
     function startGame() {
       playerName = document.getElementById("playerName").value.trim();
-      if (!playerName) return alert("Please enter your name.");
+      if (!playerName) {
+        alert("Please enter your name.");
+        return;
+      }
+
       shuffle(allQuestions);
       questions = allQuestions.slice(0, 10);
-      current = score = eggs = totalTime = 0;
+      current = 0;
+      score = 0;
+      eggs = 0;
       wrongAnswers = [];
+      totalTime = 0;
+
       document.getElementById("start").style.display = "none";
       document.getElementById("game").style.display = "block";
+
       timerInterval = setInterval(() => totalTime++, 1000);
+
       showQuestion();
     }
 
@@ -237,24 +264,30 @@
       clearInterval(countdown);
       timeLeft = 5;
       updateTimer();
+
       document.getElementById("feedback").textContent = "";
       if (current < questions.length) {
         document.getElementById("verb").textContent = questions[current].verb;
+
         const answers = ["for", "to"];
         shuffle(answers);
+
         const buttons = document.querySelectorAll(".answer-btn");
         buttons[0].textContent = answers[0];
         buttons[1].textContent = answers[1];
+
         buttons[0].onclick = () => checkAnswer(answers[0]);
         buttons[1].onclick = () => checkAnswer(answers[1]);
+
         countdown = setInterval(() => {
           timeLeft--;
           updateTimer();
           if (timeLeft <= 0) {
             clearInterval(countdown);
-            handleWrong(null);
+            handleWrong(null); // timed out
           }
         }, 1000);
+
         updateProgressBar();
       } else {
         endGame();
@@ -273,12 +306,15 @@
     function showEgg() {
       const egg = document.getElementById("eggImage");
       egg.style.display = "block";
-      setTimeout(() => egg.style.display = "none", 1000);
+      setTimeout(() => {
+        egg.style.display = "none";
+      }, 1000);
     }
 
     function checkAnswer(answer) {
       clearInterval(countdown);
       const correct = questions[current].preposition;
+
       if (answer === correct) {
         score++;
         eggs++;
@@ -289,6 +325,7 @@
         handleWrong(answer);
         return;
       }
+
       current++;
       updateProgressBar();
       setTimeout(showQuestion, 1200);
@@ -299,6 +336,7 @@
       const verb = questions[current].verb;
       document.getElementById("feedback").textContent = `Wrong! The correct answer was "${correct}".`;
       document.getElementById("wrongSound").play();
+
       wrongAnswers.push({ verb, correct, answer: answer || "No answer (timed out)" });
       current++;
       updateProgressBar();
@@ -308,21 +346,26 @@
     function endGame() {
       clearInterval(timerInterval);
       clearInterval(countdown);
+
       document.getElementById("game").style.display = "none";
       document.getElementById("scoreboard").style.display = "block";
+
       document.getElementById("nameDisplay").textContent = playerName;
       document.getElementById("finalScore").textContent = score;
       document.getElementById("eggCount").textContent = eggs;
       document.getElementById("totalQuestions").textContent = questions.length;
       document.getElementById("totalTime").textContent = totalTime;
+
       const wrongList = document.getElementById("wrongList");
       wrongList.innerHTML = "";
       wrongAnswers.forEach(item => {
         wrongList.innerHTML += `<li><strong>${item.verb}</strong>: You chose "<em>${item.answer}</em>", correct is "<strong>${item.correct}</strong>"</li>`;
       });
+
       const row = `<tr><td>${playerName}</td><td>${score}/${questions.length}</td><td>${eggs}</td><td>${totalTime}</td></tr>`;
       document.getElementById("scoreTable").innerHTML += row;
     }
   </script>
+
 </body>
 </html>
